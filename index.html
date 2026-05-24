@@ -7,20 +7,17 @@
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <style>
     * { box-sizing: border-box; }
-
     body {
       margin: 0;
       font-family: Arial, sans-serif;
       background: #f4f6f8;
       color: #1f2937;
     }
-
     .wrap {
       max-width: 520px;
       margin: 0 auto;
       padding: 18px;
     }
-
     .card {
       background: white;
       border-radius: 18px;
@@ -28,25 +25,21 @@
       box-shadow: 0 8px 24px rgba(0,0,0,0.08);
       margin-bottom: 14px;
     }
-
     h1 {
       margin: 8px 0 4px;
       font-size: 26px;
     }
-
     p {
       margin: 4px 0 12px;
       color: #6b7280;
       line-height: 1.4;
     }
-
     label {
       display: block;
       font-size: 14px;
       font-weight: 700;
       margin: 14px 0 6px;
     }
-
     input, select, textarea, button {
       width: 100%;
       font-size: 16px;
@@ -55,12 +48,10 @@
       padding: 12px;
       background: white;
     }
-
     textarea {
       min-height: 90px;
       resize: vertical;
     }
-
     button {
       border: none;
       background: #2563eb;
@@ -69,22 +60,18 @@
       margin-top: 14px;
       cursor: pointer;
     }
-
     button.secondary {
       background: #111827;
     }
-
     button.light {
       background: #e5e7eb;
       color: #111827;
     }
-
     .row {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
     }
-
     .status {
       padding: 12px;
       border-radius: 12px;
@@ -95,7 +82,6 @@
       display: none;
       white-space: pre-wrap;
     }
-
     .preview {
       width: 100%;
       max-height: 260px;
@@ -105,19 +91,18 @@
       margin-top: 10px;
       display: none;
     }
-
     .small {
       font-size: 12px;
       color: #6b7280;
     }
   </style>
 </head>
-
 <body>
   <div class="wrap">
     <div class="card">
       <h1>Expense Tracker</h1>
       <p>Upload a receipt or enter an expense manually. Review the fields, then save to Google Sheets.</p>
+      <p class="small">Important: replace WEB_APP_URL below in the code before publishing.</p>
     </div>
 
     <div class="card">
@@ -142,7 +127,6 @@
           <label>Amount</label>
           <input id="amount" type="number" inputmode="decimal" placeholder="3000" />
         </div>
-
         <div>
           <label>Expense Date</label>
           <input id="expenseDate" type="date" />
@@ -192,7 +176,6 @@
 
       <button onclick="saveExpense()">Save Expense</button>
       <button class="light" onclick="clearForm()">Clear Form</button>
-
       <div id="saveStatus" class="status"></div>
     </div>
   </div>
@@ -216,16 +199,13 @@
   function previewImage() {
     const file = document.getElementById("imageInput").files[0];
     const preview = document.getElementById("imagePreview");
-
     if (!file) return;
-
     preview.src = URL.createObjectURL(file);
     preview.style.display = "block";
   }
 
   async function readReceipt() {
     const file = document.getElementById("imageInput").files[0];
-
     if (!file) {
       showStatus("ocrStatus", "Please choose a receipt image first.");
       return;
@@ -236,25 +216,14 @@
     try {
       const result = await Tesseract.recognize(file, "eng");
       const text = result.data.text || "";
-
       document.getElementById("rawText").value = text;
 
       const parsed = parseReceiptText(text);
-
-      if (parsed.amount) {
-        document.getElementById("amount").value = parsed.amount;
-      }
-
-      if (parsed.date) {
-        document.getElementById("expenseDate").value = parsed.date;
-      }
-
-      if (parsed.merchant) {
-        document.getElementById("merchant").value = parsed.merchant;
-      }
+      if (parsed.amount) document.getElementById("amount").value = parsed.amount;
+      if (parsed.date) document.getElementById("expenseDate").value = parsed.date;
+      if (parsed.merchant) document.getElementById("merchant").value = parsed.merchant;
 
       const selectedCategory = document.getElementById("category").value;
-
       if (selectedCategory === "Auto Detect") {
         document.getElementById("category").value = guessCategory(text);
       }
@@ -266,15 +235,10 @@
   }
 
   function parseReceiptText(text) {
-    const lines = text
-      .split(/\n/)
-      .map(x => x.trim())
-      .filter(Boolean);
-
+    const lines = text.split(/\n/).map(x => x.trim()).filter(Boolean);
     const merchant = lines.length ? lines[0] : "";
 
     let amount = "";
-
     const amountPatterns = [
       /PHP\s*([\d,]+\.\d{2})/i,
       /₱\s*([\d,]+\.\d{2})/i,
@@ -286,7 +250,6 @@
 
     for (const pattern of amountPatterns) {
       const match = text.match(pattern);
-
       if (match) {
         amount = match[1].replace(/,/g, "");
         break;
@@ -297,123 +260,42 @@
       const all = [...text.matchAll(/([\d,]+\.\d{2})/g)]
         .map(m => Number(m[1].replace(/,/g, "")))
         .filter(n => !isNaN(n));
-
-      if (all.length) {
-        amount = Math.max(...all).toString();
-      }
+      if (all.length) amount = Math.max(...all).toString();
     }
 
     let date = "";
-
     const monthMatch = text.match(/(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)[a-z]*\s+(\d{1,2}),\s*(\d{4})/i);
-
     if (monthMatch) {
-      const monthNames = {
-        jan: 1,
-        feb: 2,
-        mar: 3,
-        apr: 4,
-        may: 5,
-        jun: 6,
-        jul: 7,
-        aug: 8,
-        sep: 9,
-        sept: 9,
-        oct: 10,
-        nov: 11,
-        dec: 12
-      };
-
+      const monthNames = { jan:1, feb:2, mar:3, apr:4, may:5, jun:6, jul:7, aug:8, sep:9, sept:9, oct:10, nov:11, dec:12 };
       const mm = String(monthNames[monthMatch[1].toLowerCase()]).padStart(2, "0");
       const dd = String(monthMatch[2]).padStart(2, "0");
-
       date = `${monthMatch[3]}-${mm}-${dd}`;
     }
 
     const slashMatch = text.match(/\b(\d{1,2})\/(\d{1,2})\/(\d{4})\b/);
-
     if (!date && slashMatch) {
       const mm = String(slashMatch[1]).padStart(2, "0");
       const dd = String(slashMatch[2]).padStart(2, "0");
-
       date = `${slashMatch[3]}-${mm}-${dd}`;
     }
 
-    return {
-      merchant,
-      amount,
-      date
-    };
+    return { merchant, amount, date };
   }
 
   function guessCategory(text) {
     const t = text.toLowerCase();
-
-    if (
-      t.includes("landers") ||
-      t.includes("s&r") ||
-      t.includes("puregold") ||
-      t.includes("supermarket") ||
-      t.includes("grocery")
-    ) {
-      return "Groceries";
-    }
-
-    if (
-      t.includes("petron") ||
-      t.includes("shell") ||
-      t.includes("caltex") ||
-      t.includes("seaoil") ||
-      t.includes("phoenix")
-    ) {
-      return "Gasoline";
-    }
-
-    if (
-      t.includes("negros power") ||
-      t.includes("primewater") ||
-      t.includes("pldt") ||
-      t.includes("globe")
-    ) {
-      return "Utilities";
-    }
-
-    if (
-      t.includes("pru life") ||
-      t.includes("prulife")
-    ) {
-      return "Insurance";
-    }
-
-    if (
-      t.includes("pagibig") ||
-      t.includes("pag-ibig") ||
-      t.includes("sss")
-    ) {
-      return "Government";
-    }
-
-    if (
-      t.includes("netflix") ||
-      t.includes("youtube") ||
-      t.includes("spotify")
-    ) {
-      return "Subscriptions";
-    }
-
-    if (
-      t.includes("lasalle") ||
-      t.includes("la salle")
-    ) {
-      return "School";
-    }
-
+    if (t.includes("landers") || t.includes("s&r") || t.includes("puregold") || t.includes("supermarket") || t.includes("grocery")) return "Groceries";
+    if (t.includes("petron") || t.includes("shell") || t.includes("caltex") || t.includes("seaoil") || t.includes("phoenix")) return "Gasoline";
+    if (t.includes("negros power") || t.includes("primewater") || t.includes("pldt") || t.includes("globe")) return "Utilities";
+    if (t.includes("pru life") || t.includes("prulife")) return "Insurance";
+    if (t.includes("pagibig") || t.includes("pag-ibig") || t.includes("sss")) return "Government";
+    if (t.includes("netflix") || t.includes("youtube") || t.includes("spotify")) return "Subscriptions";
+    if (t.includes("lasalle") || t.includes("la salle")) return "School";
     return "Miscellaneous";
   }
 
   async function saveExpense() {
     const categoryValue = document.getElementById("category").value;
-
     const payload = {
       dateLogged: new Date().toISOString(),
       entryType: document.getElementById("entryType").value,
@@ -437,12 +319,9 @@
       await fetch(WEB_APP_URL, {
         method: "POST",
         mode: "no-cors",
-        headers: {
-          "Content-Type": "text/plain"
-        },
+        headers: { "Content-Type": "text/plain" },
         body: JSON.stringify(payload)
       });
-
       showStatus("saveStatus", "Saved. Please check your Expenses tab.");
       clearForm(false);
     } catch (err) {
@@ -459,7 +338,6 @@
     document.getElementById("rawText").value = "";
     document.getElementById("imageInput").value = "";
     document.getElementById("imagePreview").style.display = "none";
-
     if (clearStatus) {
       document.getElementById("ocrStatus").style.display = "none";
       document.getElementById("saveStatus").style.display = "none";
