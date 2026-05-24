@@ -114,7 +114,7 @@
 
       <div id="receiptArea">
         <label>Receipt or Payment Screenshot</label>
-        <input id="imageInput" type="file" accept="image/*" onchange="previewImage()" />
+        <input id="imageInput" type="file" onchange="previewImage()" />
         <img id="imagePreview" class="preview" alt="Receipt preview" />
         <button class="secondary" onclick="readReceipt()">Read Receipt</button>
         <div id="ocrStatus" class="status"></div>
