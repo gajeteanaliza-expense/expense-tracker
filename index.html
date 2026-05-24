@@ -1,0 +1,34 @@
+function doPost(e) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheetByName("Expenses");
+
+    const data = JSON.parse(e.postData.contents);
+
+    sheet.appendRow([
+      data.dateLogged ? new Date(data.dateLogged) : new Date(),
+      data.entryType || "",
+      data.receiptDate || "",
+      data.merchant || "",
+      data.category || "Miscellaneous",
+      Number(data.amount || 0),
+      data.paymentMethod || "",
+      data.notes || "",
+      data.rawText || ""
+    ]);
+
+    return ContentService
+      .createTextOutput(JSON.stringify({
+        status: "success"
+      }))
+      .setMimeType(ContentService.MimeType.JSON);
+
+  } catch (err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({
+        status: "error",
+        message: err.message
+      }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
