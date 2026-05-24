@@ -296,6 +296,19 @@
 
   async function saveExpense() {
     const categoryValue = document.getElementById("category").value;
+    const imageFile = document.getElementById("imageInput").files[0];
+
+    let imageBase64 = "";
+    let imageFileName = "";
+    let imageMimeType = "";
+
+    if (document.getElementById("entryType").value === "With Receipt" && imageFile) {
+      const imageData = await fileToBase64(imageFile);
+      imageBase64 = imageData.base64;
+      imageFileName = imageFile.name || "receipt.jpg";
+      imageMimeType = imageFile.type || "image/jpeg";
+    }
+
     const payload = {
       dateLogged: new Date().toISOString(),
       entryType: document.getElementById("entryType").value,
@@ -305,7 +318,10 @@
       amount: document.getElementById("amount").value,
       paymentMethod: document.getElementById("paymentMethod").value,
       notes: document.getElementById("notes").value,
-      rawText: document.getElementById("rawText").value
+      rawText: document.getElementById("rawText").value,
+      imageBase64: imageBase64,
+      imageFileName: imageFileName,
+      imageMimeType: imageMimeType
     };
 
     if (!payload.amount) {
@@ -327,6 +343,19 @@
     } catch (err) {
       showStatus("saveStatus", "Save failed: " + err.message);
     }
+  }
+
+  function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = String(reader.result || "");
+        const base64 = result.includes(",") ? result.split(",")[1] : result;
+        resolve({ base64 });
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
   }
 
   function clearForm(clearStatus = true) {
