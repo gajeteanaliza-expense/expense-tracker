@@ -102,7 +102,7 @@
     <div class="card">
       <h1>Expense Tracker</h1>
       <p>Upload a receipt or enter an expense manually. Review the fields, then save to Google Sheets.</p>
-      <p class="small">This version saves the receipt photo to Google Drive when an image is attached.</p>
+      <p class="small">Grocery receipts will be saved to a separate Google Sheets tab.</p>
     </div>
 
     <div class="card">
@@ -110,6 +110,7 @@
       <select id="entryType" onchange="toggleReceiptArea()">
         <option value="With Receipt">With Receipt</option>
         <option value="No Receipt">No Receipt</option>
+        <option value="Grocery Receipt">Grocery Receipt</option>
       </select>
 
       <div id="receiptArea">
@@ -187,7 +188,13 @@
 
   function toggleReceiptArea() {
     const entryType = document.getElementById("entryType").value;
-    document.getElementById("receiptArea").style.display = entryType === "With Receipt" ? "block" : "none";
+    const receiptArea = document.getElementById("receiptArea");
+
+    if (entryType === "No Receipt") {
+      receiptArea.style.display = "none";
+    } else {
+      receiptArea.style.display = "block";
+    }
   }
 
   function showStatus(id, message) {
@@ -228,9 +235,12 @@
       if (parsed.date) document.getElementById("expenseDate").value = parsed.date;
       if (parsed.merchant) document.getElementById("merchant").value = parsed.merchant;
 
+      const entryType = document.getElementById("entryType").value;
       const selectedCategory = document.getElementById("category").value;
 
-      if (selectedCategory === "Auto Detect") {
+      if (entryType === "Grocery Receipt") {
+        document.getElementById("category").value = "Groceries";
+      } else if (selectedCategory === "Auto Detect") {
         document.getElementById("category").value = guessCategory(text);
       }
 
@@ -327,6 +337,13 @@
   }
 
   async function saveExpense() {
+    const entryType = document.getElementById("entryType").value;
+
+    if (entryType === "Grocery Receipt") {
+      await saveGroceryReceipt();
+      return;
+    }
+
     const categoryValue = document.getElementById("category").value;
     const imageFile = document.getElementById("imageInput").files[0];
 
@@ -343,8 +360,9 @@
     }
 
     const payload = {
+      action: "saveExpense",
       dateLogged: new Date().toISOString(),
-      entryType: document.getElementById("entryType").value,
+      entryType: entryType,
       receiptDate: document.getElementById("expenseDate").value,
       merchant: document.getElementById("merchant").value,
       category: categoryValue === "Auto Detect" ? guessCategory(document.getElementById("rawText").value) : categoryValue,
@@ -372,11 +390,64 @@
         body: JSON.stringify(payload)
       });
 
-      showStatus("saveStatus", "Saved. Receipt was uploaded to Google Drive if an image was attached.");
+      showStatus("saveStatus", "Saved to Expenses.");
       clearForm(false);
 
     } catch (err) {
       showStatus("saveStatus", "Save failed: " + err.message);
+    }
+  }
+
+  async function saveGroceryReceipt() {
+    const imageFile = document.getElementById("imageInput").files[0];
+
+    let receiptImageBase64 = "";
+    let receiptImageMimeType = "";
+    let receiptImageName = "";
+
+    if (imageFile) {
+      showStatus("saveStatus", "Preparing grocery receipt image...");
+
+      receiptImageBase64 = await fileToBase64(imageFile);
+      receiptImageMimeType = imageFile.type || "image/jpeg";
+      receiptImageName = imageFile.name || "grocery-receipt.jpg";
+    }
+
+    const payload = {
+      action: "saveGroceryReceipt",
+      dateLogged: new Date().toISOString(),
+      entryType: "Grocery Receipt",
+      receiptDate: document.getElementById("expenseDate").value,
+      merchant: document.getElementById("merchant").value,
+      amount: document.getElementById("amount").value,
+      paymentMethod: document.getElementById("paymentMethod").value,
+      notes: document.getElementById("notes").value,
+      rawText: document.getElementById("rawText").value,
+      receiptImageBase64: receiptImageBase64,
+      receiptImageMimeType: receiptImageMimeType,
+      receiptImageName: receiptImageName
+    };
+
+    if (!payload.rawText && !imageFile) {
+      showStatus("saveStatus", "Please upload or read a grocery receipt first.");
+      return;
+    }
+
+    showStatus("saveStatus", "Saving grocery receipt to the Grocery Receipts tab...");
+
+    try {
+      await fetch(WEB_APP_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify(payload)
+      });
+
+      showStatus("saveStatus", "Saved to Grocery Receipts.");
+      clearForm(false);
+
+    } catch (err) {
+      showStatus("saveStatus", "Grocery receipt save failed: " + err.message);
     }
   }
 
