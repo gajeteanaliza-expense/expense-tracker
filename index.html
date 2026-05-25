@@ -110,7 +110,7 @@
       <select id="entryType" onchange="toggleReceiptArea()">
         <option value="With Receipt">With Receipt</option>
         <option value="No Receipt">No Receipt</option>
-        <option value="Grocery Receipt">Grocery Receipt</option>
+        <option value="Grocery Receipts">Grocery Receipts</option>
       </select>
 
       <div id="receiptArea">
@@ -235,10 +235,10 @@
       if (parsed.date) document.getElementById("expenseDate").value = parsed.date;
       if (parsed.merchant) document.getElementById("merchant").value = parsed.merchant;
 
-      const entryType = document.getElementById("entryType").value;
+      const entryType = document.getElementById("entryType").value.toLowerCase();
       const selectedCategory = document.getElementById("category").value;
 
-      if (entryType === "Grocery Receipt") {
+      if (entryType.includes("grocery")) {
         document.getElementById("category").value = "Groceries";
       } else if (selectedCategory === "Auto Detect") {
         document.getElementById("category").value = guessCategory(text);
@@ -339,7 +339,7 @@
   async function saveExpense() {
     const entryType = document.getElementById("entryType").value;
 
-    if (entryType === "Grocery Receipt") {
+    if (entryType.toLowerCase().includes("grocery")) {
       await saveGroceryReceipt();
       return;
     }
@@ -416,7 +416,7 @@
     const payload = {
       action: "saveGroceryReceipt",
       dateLogged: new Date().toISOString(),
-      entryType: "Grocery Receipt",
+      entryType: "Grocery Receipts",
       receiptDate: document.getElementById("expenseDate").value,
       merchant: document.getElementById("merchant").value,
       amount: document.getElementById("amount").value,
