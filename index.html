@@ -6,18 +6,23 @@
   <title>Expense Tracker</title>
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <style>
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
       font-family: Arial, sans-serif;
       background: #f4f6f8;
       color: #1f2937;
     }
+
     .wrap {
       max-width: 520px;
       margin: 0 auto;
       padding: 18px;
     }
+
     .card {
       background: white;
       border-radius: 18px;
@@ -25,33 +30,62 @@
       box-shadow: 0 8px 24px rgba(0,0,0,0.08);
       margin-bottom: 14px;
     }
+
     h1 {
       margin: 8px 0 4px;
       font-size: 26px;
     }
+
     p {
       margin: 4px 0 12px;
       color: #6b7280;
       line-height: 1.4;
     }
+
     label {
       display: block;
       font-size: 14px;
       font-weight: 700;
       margin: 14px 0 6px;
     }
-    input, select, textarea, button {
+
+    input,
+    select,
+    textarea,
+    button {
       width: 100%;
       font-size: 16px;
       border-radius: 12px;
       border: 1px solid #d1d5db;
       padding: 12px;
       background: white;
+      font-family: Arial, sans-serif;
     }
+
+    input,
+    select {
+      height: 54px;
+      min-height: 54px;
+      padding: 0 12px;
+      line-height: normal;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    input[type="date"] {
+      height: 54px;
+      min-height: 54px;
+      padding: 0 12px;
+      line-height: normal;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
     textarea {
       min-height: 90px;
       resize: vertical;
     }
+
     button {
       border: none;
       background: #2563eb;
@@ -59,19 +93,44 @@
       font-weight: 700;
       margin-top: 14px;
       cursor: pointer;
+      height: auto;
+      min-height: 48px;
+      padding: 12px;
+      appearance: none;
+      -webkit-appearance: none;
     }
+
     button.secondary {
       background: #111827;
     }
+
     button.light {
       background: #e5e7eb;
       color: #111827;
     }
+
     .row {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
+      align-items: start;
     }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .field label {
+      height: 20px;
+      line-height: 20px;
+      margin: 14px 0 6px;
+    }
+
+    .field input {
+      display: block;
+    }
+
     .status {
       padding: 12px;
       border-radius: 12px;
@@ -82,6 +141,7 @@
       display: none;
       white-space: pre-wrap;
     }
+
     .preview {
       width: 100%;
       max-height: 260px;
@@ -91,6 +151,7 @@
       margin-top: 10px;
       display: none;
     }
+
     .small {
       font-size: 12px;
       color: #6b7280;
@@ -124,11 +185,12 @@
 
     <div class="card">
       <div class="row">
-        <div>
+        <div class="field">
           <label>Amount</label>
           <input id="amount" type="number" inputmode="decimal" placeholder="3000" />
         </div>
-        <div>
+
+        <div class="field">
           <label>Expense Date</label>
           <input id="expenseDate" type="date" />
         </div>
