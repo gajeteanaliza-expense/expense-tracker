@@ -557,6 +557,7 @@
     const paymentMethod = params.get("paymentMethod");
     const amount = params.get("amount");
     const notes = params.get("notes");
+    const rawText = params.get("rawText");
     const date = params.get("date");
 
     if (entryType) {
@@ -584,13 +585,17 @@
       document.getElementById("notes").value = notes;
     }
 
+    if (rawText) {
+      document.getElementById("rawText").value = rawText;
+    }
+
     if (date) {
       document.getElementById("expenseDate").value = date;
     } else {
       document.getElementById("expenseDate").valueAsDate = new Date();
     }
 
-    if (entryType || merchant || category || paymentMethod || amount || notes) {
+    if (entryType || merchant || category || paymentMethod || amount || notes || rawText) {
       showStatus("saveStatus", "Quick entry loaded from QR. Review the amount, then tap Save Expense.");
     }
   }
